@@ -1,0 +1,13 @@
+lab3/html/
+lab4-Websites Seach/html/
+lab4-Websites Seach/index_lucene/
+lab4-Websites Seach/index_lucene_v3/
+lab4-Websites Seach/index_lucene_v3_highlight/
+lab5-Image Search/html/
+lab5-Image Search/image_index/
+lab5-Image Search/image_index_v3/
+lab6/image_index_v3/
+lab6/index_lucene_v3_highlight/
+*.zip
+*.txt
+*.pdf

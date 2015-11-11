@@ -1,0 +1,51 @@
+$def with(keyword,res_list,page_index,page_size,total)
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>$keyword Page:$page_index@ Linoole SE</title>
+		<meta charset="utf-8"/>
+		<link rel="stylesheet" type="text/css" href="static/css/css.css">
+	</head>
+	<body>
+		<br><br>
+		<div style="margin-top: 20px;margin-left: 20px">
+		<form action="/s" method="GET" >
+		<input type="text" style="font-family:courier;width: 400px" placeholder="tell me what you want" value="$keyword" name="keyword">&nbsp;&nbsp;&nbsp;
+		<input type="submit" class="button button-orange" style="font-family:courier" value="Search Images"  name="typ" />&nbsp;&nbsp;&nbsp;
+		<input type="submit" class="button button-blue" style="font-family:courier" value="Search Websites" name="typ" />
+		
+		</form>
+		</div>
+		<br><br>
+		<div id="info" class="align-right">
+		</div>
+		<div class="nav nav-green" style="font-family:courier;margin-left:20px;margin-right:20px">
+	   		<a class="nav-item nav-head" href="/s?keyword=$keyword&typ=Search+Images&p=1">First Page(1)</a>&nbsp;
+		$for i in range(max(2,page_index-3),min(page_index+8,total/page_size+1)):
+			$if(i==page_index):
+				<a class="nav-item nav-head" href="/s?keyword=$keyword&typ=Search+Images&p=$i" >$i</a>&nbsp;
+			$else:
+				<a class="nav-item" href="/s?keyword=$keyword&typ=Search+Images&p=$i" >$i</a>&nbsp;
+	<a class="nav-item nav-head"  href="/s?keyword=$keyword&typ=Search+Images&p=$(total/page_size+1)">Last Page($(total/page_size+1))</a>&nbsp;
+	<a class="nav-item right"  href="#">Total: $total</a>&nbsp;
+	
+	    </div>
+	    <div id="resultList" style="margin: 25px" >
+	    <br><br>
+	    <table>
+		$if total>0: 
+			$for i in range(len(res_list)):
+				$ item = res_list[i]
+				$if((i)%8==0):
+					<tr>
+				<td>
+				<img style="margin: 30px;width:100px; height=100px; " src="$item[2]"  /><br>
+				<div style"width:120px;"><a target="view_window" href="$item[1]">$item[3]</a></div>	
+				</td>
+				$if(i%8==7):
+					</tr>
+		</table>		
+		</div>
+	    
+    </body>
+</html>

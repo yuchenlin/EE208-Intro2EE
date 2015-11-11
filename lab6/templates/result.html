@@ -1,0 +1,74 @@
+$def with(keyword,res_list,page_index,page_size,total)
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>$keyword Page:$page_index@ Linoole SE</title>
+		<meta charset="utf-8"/>
+		<link rel="stylesheet" type="text/css" href="static/css/css.css">
+	</head>
+	<body>
+		<br><br>
+
+		<div style="margin-top: 20px;margin-left: 20px">
+		<form action="/s" method="GET" >
+		<input type="text" style="font-family:courier;width: 400px" placeholder="tell me what you want" value="$keyword" name="keyword">&nbsp;&nbsp;&nbsp;
+		<input type="submit" class="button button-blue" style="font-family:courier" value="Search Websites" name="typ" />&nbsp;&nbsp;&nbsp;
+		<input type="submit" class="button button-orange" style="font-family:courier" value="Search Images"  name="typ" />
+		</form>
+		</div>
+		<br><br>
+		<div id="info" class="align-right">
+		</div>
+		<div class="nav nav-blue" style="font-family:courier;margin-left:20px;margin-right:20px">
+	   		<a class="nav-item nav-head" href="/s?keyword=$keyword&p=1">First Page(1)</a>&nbsp;
+		$for i in range(max(2,page_index-3),min(page_index+8,total/page_size+1)):
+			$if(i==page_index):
+				<a class="nav-item nav-head" href="/s?keyword=$keyword&p=$i" >$i</a>&nbsp;
+			$else:
+				<a class="nav-item" href="/s?keyword=$keyword&p=$i" >$i</a>&nbsp;
+	<a class="nav-item nav-head"  href="/s?keyword=$keyword&p=$(total/page_size+1)">Last Page($(total/page_size+1))</a>&nbsp;
+	<a class="nav-item right"  href="#">Total: $total</a>&nbsp;
+	
+	    </div>
+	    <table>
+	    <tr><td class="w-50">
+	    <div id="resultList" style="margin: 20px" >
+	    <br><br>
+		$if total>0:
+			$for item in res_list[0:len(res_list)/2+1]:
+			<div id="res" class="w-50">
+				<h4><a target="view_window" href="$item[1]">$item[0]</a></h4>	<br>
+				<div class='msg msg-blue font-black'><h5>
+				$if item[2]!= None:
+					......$:item[2].replace(' ','').replace('_forblank_',' ')......
+					</h5>
+				</div>
+				<br>
+				<br>
+			</div>
+		$else:
+		    Sorry, there is no result for your query.
+	    </div></td>
+	    <td class="w-5"></td>
+	    <td class="w-50">
+	    <div id="resultList" style="margin: 20px" >
+	    <br><br>
+		$if total>0:
+			$for item in res_list[len(res_list)/2+1:len(res_list)]:
+			<div id="res" class="w-50">
+				<h4><a target="view_window" href="$item[1]">$item[0]</a></h4>	<br>
+				<div class='msg msg-blue font-black'><h5>
+				$if item[2]!= None:
+					......$:item[2].replace(' ','').replace('_forblank_',' ')......
+					</h5>
+				</div>
+				<br>
+				<br>
+			</div>
+		$else:
+		    Sorry, there is no result for your query.
+	    </div>
+	    </td>
+    	</tr>
+    </body>
+</html>
