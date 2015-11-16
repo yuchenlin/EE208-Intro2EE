@@ -19,5 +19,3 @@ def checkFuzz(word):
 	    return a.get_text()
     else:
     	return None
-
-print checkFuzz('余hua')
