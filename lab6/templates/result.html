@@ -1,4 +1,4 @@
-$def with(keyword,res_list,page_index,page_size,total,crctKW,havecrct)
+$def with(keyword,res_list,page_index,page_size,total,crctKW,havecrct,relevList)
 <!DOCTYPE html>
 <html>
 	<head>
@@ -73,5 +73,34 @@ $def with(keyword,res_list,page_index,page_size,total,crctKW,havecrct)
 	    </div>
 	    </td>
     	</tr>
+    	
+    	$if(len(relevList)==9):
+    		<tr>
+    		<td class="w-50"></td>
+    		<td class="w-5"></td>
+	    	<td class="w-50">
+	    	<div class="msg msg-yellow" style="margin-left: 20px">
+	    		<h4>相关搜索</h4>
+	    		<br>
+	    		<table>
+	    			<tr>
+	    				<td class="w-33"><a href="/s?keyword=$relevList[0]">$relevList[0]</a></td>
+	    				<td class="w-33"><a href="/s?keyword=$relevList[1]">$relevList[1]</a></td>
+	    				<td class="w-33"><a href="/s?keyword=$relevList[2]">$relevList[2]</a></td>
+	    			</tr>
+	    			<tr>
+	    				<td class="w-30"><a href="/s?keyword=$relevList[3]">$relevList[3]</a></td>
+	    				<td class="w-30"><a href="/s?keyword=$relevList[4]">$relevList[4]</a></td>
+	    				<td class="w-30"><a href="/s?keyword=$relevList[5]">$relevList[5]</a></td>
+	    			</tr>
+	    			<tr>
+	    				<td class="w-33"><a href="/s?keyword=$relevList[6]">$relevList[6]</a></td>
+	    				<td class="w-33"><a href="/s?keyword=$relevList[7]">$relevList[7]</a></td>
+	    				<td class="w-33"><a href="/s?keyword=$relevList[8]">$relevList[8]</a></td>
+	    			</tr>
+	    		</table>
+	    	</div>
+    		</td></tr>
+    	</table>
     </body>
 </html>
