@@ -7,6 +7,7 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 
 def checkFuzz(word):
+	
     url = 'http://www.baidu.com/s?'
     postdata = urllib.urlencode({'wd':word})
     req = urllib2.Request(url+postdata)
@@ -18,4 +19,4 @@ def checkFuzz(word):
 	    a = div.findAll('strong')[1]
 	    return a.get_text()
     else:
-    	return None
+    	return word

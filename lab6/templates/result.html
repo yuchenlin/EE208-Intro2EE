@@ -1,4 +1,4 @@
-$def with(keyword,res_list,page_index,page_size,total)
+$def with(keyword,res_list,page_index,page_size,total,crctKW,havecrct)
 <!DOCTYPE html>
 <html>
 	<head>
@@ -16,9 +16,13 @@ $def with(keyword,res_list,page_index,page_size,total)
 		<input type="submit" class="button button-orange" style="font-family:courier" value="Search Images"  name="typ" />
 		</form>
 		</div>
-		<br><br>
-		<div id="info" class="align-right">
-		</div>
+			$if(havecrct):
+				<br>
+				<div style="margin-top: 5px;margin-left: 20px">
+						<span class='msg msg-red font-black'>您想搜索的是不是：<a href='/s?keyword=$crctKW'>$crctKW</a></span><br>
+				</div>
+				<br>
+		<br>
 		<div class="nav nav-blue" style="font-family:courier;margin-left:20px;margin-right:20px">
 	   		<a class="nav-item nav-head" href="/s?keyword=$keyword&p=1">First Page(1)</a>&nbsp;
 		$for i in range(max(2,page_index-3),min(page_index+8,total/page_size+1)):
@@ -30,6 +34,7 @@ $def with(keyword,res_list,page_index,page_size,total)
 	<a class="nav-item right"  href="#">Total: $total</a>&nbsp;
 	
 	    </div>
+
 	    <table>
 	    <tr><td class="w-50">
 	    <div id="resultList" style="margin: 20px" >
@@ -65,8 +70,6 @@ $def with(keyword,res_list,page_index,page_size,total)
 				<br>
 				<br>
 			</div>
-		$else:
-		    Sorry, there is no result for your query.
 	    </div>
 	    </td>
     	</tr>

@@ -1,10 +1,14 @@
+#coding=utf-8
 import web
 from web import form
 import urllib2
 import os
 import SearchFiles_webVersion
 import SearchImages_webVersion
+import tools
 from datetime import datetime
+
+
 urls= (
     '/','index',
     '/s','s'
@@ -12,6 +16,11 @@ urls= (
 
 render = web.template.render('templates')
 
+#检查用户输入的单词是否有可能是错误的输入
+def checkFuzz(word):
+    bdrs = urllib2.urlopen('https://www.baidu.com/s',data={'wd':word})
+    
+    return 
 
 class index:
     def GET(self):
@@ -32,6 +41,7 @@ class s:
         typ = 0 # 0 is text and 1 is image
         if(user_data.has_key('typ')):
             typ = 0 + (user_data['typ']=='Search Images')
+        nocrct = False
         print typ
         p = 1
         if(user_data.has_key('p')):
@@ -39,8 +49,13 @@ class s:
         if(keyword=='' or keyword==None):
             return render.formtest()
         if(typ==0):
-            res_list,total = SearchFiles_webVersion.run(keyword,p,10)
-            return render.result(keyword,res_list,p,10,total)
+            havecrct = False
+            oriKW = keyword
+            crctKW = tools.checkFuzz(keyword)
+            havecrct = not (crctKW==oriKW)
+            res_list,total = SearchFiles_webVersion.run(oriKW,p,10)
+
+            return render.result(keyword,res_list,p,10,total,crctKW,havecrct)
         else:
             res_list,total = SearchImages_webVersion.run(keyword,p,60)
             return render.img_res(keyword,res_list,p,60,total)
