@@ -7,7 +7,6 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 
 def checkFuzz(word):
-	
     url = 'http://www.baidu.com/s?'
     postdata = urllib.urlencode({'wd':word})
     req = urllib2.Request(url+postdata)
