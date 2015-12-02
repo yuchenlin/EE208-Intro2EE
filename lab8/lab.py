@@ -82,12 +82,15 @@ def MyCanny(url,l1=0.79,l2=0.5):
 	
 	for x in range(1,img.shape[0]-1):
 		for y in range(1,img.shape[1]-1):
-			if(P[x][y] == 0):
-				Sita[x][y] = np.sign(Q[x][y]) * PI/2
-			else:
-				Sita[x][y] = math.atan(Q[x][y]/P[x][y])
+			Sita[x][y] = math.atan2(Q[x][y],P[x][y])
+			# if(P[x][y] == 0):
+			# 	Sita[x][y] = np.sign(Q[x][y]) * PI/2
+			# else:
+			# 	Sita[x][y] = math.atan(Q[x][y]/P[x][y])
 
 	#surpress the non-extreme-value
+	import time
+	start = time.time()
 	for x in range(1,img.shape[0]-1):
 		for y in range(1,img.shape[1]-1):
 			if(M[x][y]==0):
@@ -99,7 +102,7 @@ def MyCanny(url,l1=0.79,l2=0.5):
 				N[x][y] = 0 
 			else:
 				N[x][y] = 110 # (x,y) is a possible edge point
-
+	print time.time() - start
 	#calc the hist of the M
 	histM = [0]*370 #because the maximum of M is 360*1.414
 	for x in range(1,img.shape[0]-1):
@@ -156,11 +159,6 @@ def Trace(ori_x,ori_y,lowThresold,res,MM):
 			Trace(x,y,lowThresold,res,MM)
 
 	
-#MyCanny('target.jpg',0.77,0.5)
-MyCanny('dataset/2.jpg',0.71,0.5)
+MyCanny('dataset/2.jpg',0.77,0.5)
 # MyCanny('dataset/1.jpg',0.71,0.33)
-# MyCanny('dataset/2.jpg',0.71,0.33)
 # MyCanny('dataset/3.jpg',0.71,0.33)
-
-
-
