@@ -19,7 +19,7 @@ def getTheta(im,x,y):
     return int(math.atan2(dy,dx)*180/math.pi+180)
 #判断是否越界
 def isValid(im,x,y):
-    return (x>=1) and (x<=(im.shape[0]-3)) and (y>=1) and (y<=(im.shape[1]-3))
+    return (x>=16) and (x<=(im.shape[0]-16)) and (y>=16) and (y<=(im.shape[1]-16))
 
 #计算主梯度方向
 def getMainDirection(im,f):
@@ -73,53 +73,68 @@ def insertValue(im,x,y,dir):
 
 #     return siftVec
 
+def convertX(x,y,x0,sinDir,cosDir):
+    return int(x * cosDir - y*sinDir + x0)
+
+def convertY(x,y,y0,sinDir,cosDir):
+    return int(x * sinDir + y*cosDir + y0)
+
 def getSIFTVector(im,features):
     siftVec = []
     
+    #定义存储单元
+    Inten=[0]*16               # 存储梯度强度
+    Theta=[0]*16               # 存储梯度方向
+    for i in range(16):
+        Inten[i]=[0]*16
+        Theta[i]=[0]*16
+    final={}                    #128维sift 向量
 
     for f in features:
+        fx = int(f[0]); fy=int(f[1]);
+        if(not isValid(im,fx,fy)):
+            continue
         mainDirection = getMainDirection(im,f)
         dir = mainDirection*math.pi/180.0
         sinDir = math.sin(dir)
         cosDir = math.cos(dir)
+        
+        #坐标变换
+        for x in range(-8,9):
+            for y in range(-8,9):
+                rx = convertX(x,y,fx,sinDir,cosDir)
+                rx1 = convertX(x-1,y,fx,sinDir,cosDir)
+                rx2 = convertX(x+1,y,fx,sinDir,cosDir)
+
+                ry = convertY(x,y,fy,sinDir,cosDir)
+                ry1 = convertY(x,y-1,fy,sinDir,cosDir)
+                ry2 = convertY(x,y+1,fy,sinDir,cosDir)
+
+                Inten[x][y] = math.hypot((im[rx1,ry]-im[rx2,ry]),(im[rx,ry1]-im[rx,ry2]))
+                Theta[x][y] = math.atan2(im[rx1][ry]-im[rx2][ry],im[rx][ry1]-im[rx][ry2]) + math.pi + dir
 
 
-        fx = int(f[0]); fy=int(f[1]);
-        x0 = fx + 8*sinDir
-        y0 = fy - 8*cosDir
+                while Theta[x][y] >= math.pi * 2:
+                    Theta[x][y] -= math.pi * 2
+                while Theta[x][y] < 0:
+                    Theta[x][y] += 2*math.pi
 
-        x0 = x0 - 8*cosDir
-        y0 = y0 - 8*sinDir
-        #此时 x0,y0为物体坐标系的最左上角的点的坐标
         #计算描述子
-        Hist = []
-        #把16*16的区域 分成16个块 每个块4*4
-        for i in range(4):
-            x1 = x0 + 4*i*cosDir
-            y1 = y0 + 4*i*sinDir
-            #x1,y1为每个小块的左上角的点
-            for j in range(4):
-                x2 = x1 - 4*j*sinDir
-                y2 = x1 + 4*j*cosDir
 
+        Hist=[]
+
+        for i in range(-2,2):
+            for j in range(-2,2):     # 16*16 pixel -> 4*4 blocks
                 tmpHist = [0]*8
-                
                 for m in range(4):
-                    x3 = x2 + m*cosDir
-                    y3 = y2 + m*sinDir
+                    for n in range(4):
+                        
+                        xx = i * 4 + m
 
-                    for k in range(4):
-                        x4 = x3 - k*sinDir
-                        y4 = y3 + k*cosDir
-
-                        if(isValid(im,x4,y4)):
-                            ind = int(insertValue(im,x4,y4,mainDirection)/45)
-                            if ind == 8 : ind = 0
-
-                            tmpHist[ind] += 1
-                #累计
-                Hist += tmpHist
-        #对每个特征点
+                        yy = j * 4 + n
+                        tmpHist[int(Theta[xx][yy]/(math.pi/4))] += Inten[xx][yy]
+                
+                Hist+=tmpHist
 
         sumValue = 0
         #128维向量描述子  
@@ -160,32 +175,24 @@ def getSIFTbyURL(url,scale=1,mainDirection=0):
     return vector,goodFeatures
 
 def main():
-    url2 = 'dataset/3.jpg'
-    url1 = 'tar.jpg'
+    url1 = 'target.jpg'
+    url2 = 'dataset/5.jpg'
+
     v_tar,f_t = getSIFTbyURL(url1)
-    v_i,f_i  = getSIFTbyURL(url2)
-    k = 0
-    chosen = [0]*len(v_i)
+    v_i,f_i  = getSIFTbyURL(url2) 
+
     res_t = []
     res_i = []
-    for vt in v_tar:
-        maxI = 0
-        n = 0
-        j = 0
-        for vi in v_i:
-            tmp = 0
-            for i in range(128):
-                tmp += vt[i]*vi[i]
-            if tmp > maxI and chosen[j]==0:
-                maxI = tmp
-                n = j
-            j+=1
-        if(maxI>0.75):
-            res_t.append(f_t[k])
-            res_i.append(f_i[n])
-            chosen[n]=1
-        chosen[n] = 1
-        k+=1
+
+    for t,vt in enumerate(v_tar): 
+        for i,vi in enumerate(v_i): 
+            s = 0
+            for ind in range(128):
+                s += vt[ind]*vi[ind]
+            if(s>1):
+                res_t.append(f_t[t])
+                res_i.append(f_i[i])  
+
     img1 = cv2.imread(url1)
     img2 = cv2.imread(url2)
     drawMatches(img1,res_t,img2,res_i)
