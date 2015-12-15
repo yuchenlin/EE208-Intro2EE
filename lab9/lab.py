@@ -58,11 +58,18 @@ def insertValue(im,x,y,dir):
     return res
 
 #计算SIFT的向量
+
 def getSIFTVector(im,mainDirection,features):
+    siftVec = []
+
+    return siftVec
+
+def getSIFTVector_(im,mainDirection,features):
     siftVec = []
     dir = mainDirection/180.0*math.pi
     sinDir = math.sin(dir)
     cosDir = math.cos(dir)
+
     for f in features:
         fx = int(f[0][0]); fy=int(f[0][1]);
         x0 = fx + 8*sinDir
@@ -103,6 +110,7 @@ def getSIFTVector(im,mainDirection,features):
 
         sumValue = 0
         #128维向量描述子  
+
         for i in range(128):
             sumValue += Hist[i]**2
         sumValue = math.sqrt(sumValue)
@@ -112,11 +120,15 @@ def getSIFTVector(im,mainDirection,features):
         siftVec.append(Hist)
 
     return siftVec
-
-def getSIFTbyURL(url):
+def getResizedImg(ori,scale):
+    x = int(round(ori.shape[0]*scale))
+    y = int(round(ori.shape[1]*scale))
+    return cv2.resize(ori,(x,y))
+def getSIFTbyURL(url,scale=1):
     filename = url
     img = cv2.imread(filename,0)
-
+    if(scale!=1):
+        img = getResizedImg(img,scale)
     #获得角点       
     goodFeatures = cv2.goodFeaturesToTrack(img,100,0.01,5)
     #print goodFeatures[0][0]
@@ -129,8 +141,10 @@ def getSIFTbyURL(url):
     return vector,goodFeatures
 
 def main():
-    v_tar,f_t = getSIFTbyURL('target.jpg')
-    v_i,f_i  = getSIFTbyURL('tar.jpg')
+    url1 = 'target.jpg'
+    url2 = 'target.jpg'
+    v_tar,f_t = getSIFTbyURL(url1)
+    v_i,f_i  = getSIFTbyURL(url2,1)
     k = 0
     chosen = [0]*len(v_i)
     res_t = []
@@ -147,17 +161,14 @@ def main():
                 maxI = tmp
                 n = j
             j+=1
-        if(maxI>0.65):
+        if(maxI>0.6):
             res_t.append(f_t[k])
             res_i.append(f_i[n])
             chosen[n]=1
         chosen[n] = 1
         k+=1
-    img1 = cv2.imread('target.jpg')
-    img2 = cv2.imread('tar.jpg')
-    
-    print res_t
-    print res_i
+    img1 = cv2.imread(url1)
+    img2 = cv2.imread(url2)
     drawMatches(img1,res_t,img2,res_i)
 
 def drawMatches(img1, kp1, img2, kp2):
@@ -193,6 +204,7 @@ def drawMatches(img1, kp1, img2, kp2):
         # thickness = 1
         print x1,y1
         print x2,y2
+        print 
         cv2.circle(out, (int(x1),int(y1)), 4, (255, 0, 0), 1)   
         cv2.circle(out, (int(x2)+cols1,int(y2)), 4, (255, 0, 0), 1)
 
