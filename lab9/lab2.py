@@ -1,5 +1,4 @@
 #coding=utf8
-
 import cv2
 import numpy as np
 import sys
@@ -19,7 +18,8 @@ def getTheta(im,x,y):
     return int(math.atan2(dy,dx)*180/math.pi+180)
 #判断是否越界
 def isValid(im,x,y):
-    return (x>=16) and (x<=(im.shape[0]-16)) and (y>=16) and (y<=(im.shape[1]-16))
+    return (x>=16) and (x<=(im.shape[0]-16)) and
+     (y>=16) and (y<=(im.shape[1]-16))
 
 #计算主梯度方向
 def getMainDirection(im,f):
@@ -41,6 +41,7 @@ def getMainDirection(im,f):
         if(Hist[ind]>maxTheta):#比当前的主方向的强度大
             maxTheta = ind*10+5 #取中值代表主方向
     return maxTheta
+
 #计算插值
 def insertValue(im,x,y,dir):
     x0 = int(x); y0 = int(y);
@@ -53,25 +54,6 @@ def insertValue(im,x,y,dir):
     res -= dir
     while res<0: res += 360;
     return res
-
-
-
-#计算SIFT的向量
-
-# def getSIFTVector_(im,mainDirection,features):
-#     siftVec = []
-#     dir = mainDirection*math.pi/180.0
-#     sinDir = math.sin(dir)
-#     cosDir = math.cos(dir)
-
-#     for f in features:
-#         fx = f[0];fy = f[1]
-
-#         if(fx<16 or fx>(im.shape[0]-16) or fy<16 or (fy>im.shape[1]-16)):
-#             continue;
-#         #旋转坐标系
-
-#     return siftVec
 
 def convertX(x,y,x0,sinDir,cosDir):
     return int(x * cosDir - y*sinDir + x0)
@@ -110,8 +92,11 @@ def getSIFTVector(im,features):
                 ry1 = convertY(x,y-1,fy,sinDir,cosDir)
                 ry2 = convertY(x,y+1,fy,sinDir,cosDir)
 
-                Inten[x][y] = math.hypot((im[rx1,ry]-im[rx2,ry]),(im[rx,ry1]-im[rx,ry2]))
-                Theta[x][y] = math.atan2(im[rx1][ry]-im[rx2][ry],im[rx][ry1]-im[rx][ry2]) + math.pi + dir
+                Inten[x][y] = math.hypot((im[rx1,ry]-im[rx2,ry]),
+                                         (im[rx,ry1]-im[rx,ry2]))
+                Theta[x][y] = math.atan2(im[rx1][ry]-im[rx2][ry],
+                                        im[rx][ry1]-im[rx][ry2])
+                                         + math.pi + dir
 
 
                 while Theta[x][y] >= math.pi * 2:
@@ -124,15 +109,14 @@ def getSIFTVector(im,features):
         Hist=[]
 
         for i in range(-2,2):
-            for j in range(-2,2):     # 16*16 pixel -> 4*4 blocks
+            for j in range(-2,2):     
                 tmpHist = [0]*8
                 for m in range(4):
                     for n in range(4):
-                        
                         xx = i * 4 + m
-
                         yy = j * 4 + n
-                        tmpHist[int(Theta[xx][yy]/(math.pi/4))] += Inten[xx][yy]
+                        tmpHist[int(Theta[xx][yy]/(math.pi/4))] 
+                            += Inten[xx][yy]
                 
                 Hist+=tmpHist
 
@@ -148,27 +132,27 @@ def getSIFTVector(im,features):
         siftVec.append(Hist)
 
     return siftVec
+
+
 def getResizedImg(ori,scale):
-    x = int(round(ori.shape[0]*scale))
-    y = int(round(ori.shape[1]*scale))
+    x = int(ori.shape[0]*scale)
+    y = int(ori.shape[1]*scale)
     return cv2.resize(ori,(x,y))
+
+
+
 def getSIFTbyURL(url,scale=1,mainDirection=0):
     filename = url
     img = cv2.imread(filename,0)
     if(scale!=1):
         img = getResizedImg(img,scale)
-    #获得角点       
+
+    #获得特征点
     goodFeatureTemp = cv2.goodFeaturesToTrack(img,100,0.01,5)
-    #print goodFeatures[0][0]
-    
     goodFeatures = []
+    #转换格式为 list
     for gf in goodFeatureTemp:
         goodFeatures.append((int(gf[0][0]),int(gf[0][1])))
-
-    #求主方向
-    # if(mainDirection==0):
-    #     mainDirection = getMainDirection(img,goodFeatures)
-    # print mainDirection
     vector = getSIFTVector(img,goodFeatures)
 
     print goodFeatures
@@ -189,7 +173,7 @@ def main():
             s = 0
             for ind in range(128):
                 s += vt[ind]*vi[ind]
-            if(s>1):
+            if(s>0.77):
                 res_t.append(f_t[t])
                 res_i.append(f_i[i])  
 
@@ -199,40 +183,18 @@ def main():
     print res_t
     print res_i
 
-def drawMatches(img1, kp1, img2, kp2):
-    # Create a new output image that concatenates the two images together
-    # (a.k.a) a montage
+def drawMatches(img1, kp1, img2, kp2): 
     rows1 = img1.shape[0]
     cols1 = img1.shape[1]
     rows2 = img2.shape[0]
     cols2 = img2.shape[1]
-
     out = np.zeros((max([rows1,rows2]),cols1+cols2,3), dtype='uint8')
-
-    # Place the first image to the left
     out[:rows1,:cols1,:] = np.dstack([img1])
-
-    # Place the next image to the right of it
     out[:rows2,cols1:cols1+cols2,:] = np.dstack([img2])
 
-    # For each pair of points we have between both images
-    # draw circles, then connect a line between them
-    for i in range(len(kp1)):
-
-        # Get the matching keypoints for each of the images
-        
-        # x - columns
-        # y - rows
+    for i in range(len(kp1)): 
         (x1,y1) = kp1[i]
-        (x2,y2) = kp2[i]
-
-        # Draw a small circle at both co-ordinates
-        # radius 4
-        # colour blue
-        # thickness = 1
-        print x1,y1
-        print x2,y2
-        print 
+        (x2,y2) = kp2[i]  
         import random
         b=random.randint(0,255)
         g=random.randint(0,255)
@@ -240,7 +202,8 @@ def drawMatches(img1, kp1, img2, kp2):
         color = (b,g,r)
         cv2.circle(out, (int(x1),int(y1)), 4, color, 1)   
         cv2.circle(out, (int(x2)+cols1,int(y2)), 4, color, 1)
-        cv2.line(out, (int(x1),int(y1)), (int(x2)+cols1,int(y2)), color, 1)
+        cv2.line(out, (int(x1),int(y1)), 
+                        (int(x2)+cols1,int(y2)), color, 1)
     cv2.imshow('Matched Features', out)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
